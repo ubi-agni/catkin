@@ -22,11 +22,12 @@ echo_and_run mkdir -p "$DESTDIR@CMAKE_INSTALL_PREFIX@/@PYTHON_INSTALL_DIR@"
 # into one location when some dependencies were installed in another
 # location, #123.
 echo_and_run /usr/bin/env \
+    PYTHONPATH="@CMAKE_INSTALL_PREFIX@/@PYTHON_INSTALL_DIR@:@CMAKE_BINARY_DIR@/@PYTHON_INSTALL_DIR@:$PYTHONPATH" \
+    "@PYTHON_EXECUTABLE@" -m build --wheel --no-isolation --outdir "@CMAKE_CURRENT_BINARY_DIR@" \
+    "@CMAKE_CURRENT_SOURCE_DIR@"
+echo_and_run /usr/bin/env \
     @PIP_EXTRA_ENV@ \
     PIP_BREAK_SYSTEM_PACKAGES=1 \
     PYTHONPATH="@CMAKE_INSTALL_PREFIX@/@PYTHON_INSTALL_DIR@:@CMAKE_BINARY_DIR@/@PYTHON_INSTALL_DIR@:$PYTHONPATH" \
-    "@PYTHON_EXECUTABLE@" -m pip install --prefix "@CMAKE_INSTALL_PREFIX@" --ignore-installed --no-deps --use-pep517 --no-build-isolation \
-    "@CMAKE_CURRENT_SOURCE_DIR@"
-
-# Remove *.egg-info directories created by pip/setuptools
-echo_and_run find -L "@CMAKE_CURRENT_SOURCE_DIR@" -name "*.egg-info" -print -exec rm -r {} +
+    "@PYTHON_EXECUTABLE@" -m pip install --prefix "@CMAKE_INSTALL_PREFIX@" --ignore-installed --no-deps \
+    "@CMAKE_CURRENT_BINARY_DIR@"/*.whl
